@@ -3,7 +3,7 @@ PyMathExpressions
 
 Python library for parsing and solving math expressions.
 
-simple example:
+Simple example:
 
     >>> import mathexpressions
     >>> parser = mathexpressions.Parser()
@@ -15,5 +15,5 @@ simple example:
     >>> parser.parse_function('x^2')
     16
     
-For advanced usage view the example.py at GitHub (https://github.com/NoahPeeters/pymathexpressions/blob/master/example.py).
+For advanced usage check the example.py (https://github.com/NoahPeeters/pymathexpressions/blob/master/example.py) out.
 A documentation is comming soon.
