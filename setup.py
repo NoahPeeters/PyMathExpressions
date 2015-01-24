@@ -9,7 +9,7 @@ def readme():
 
 setup(name='mathexpressions',
       version='0.3',
-      description='Python library for parsing and solving math expressions.Example Usage: ' +
+      description='Python library for parsing and solving math expressions. Example Usage: ' +
                   'https://github.com/NoahPeeters/pymathexpressions/blob/master/example.py ' +
                   'Documentation is coming soon.',
       url='https://github.com/NoahPeeters/pymathexpressions',
