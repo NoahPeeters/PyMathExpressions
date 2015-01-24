@@ -2,6 +2,11 @@ __author__ = 'Noah Peeters'
 
 from setuptools import setup
 
+
+def readme():
+    with open('README.rst') as f:
+        return f.read()
+
 setup(name='mathexpressions',
       version='0.3',
       description='Python library for parsing and solving math expressions.Example Usage: ' +
