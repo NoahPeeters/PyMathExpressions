@@ -44,8 +44,8 @@ class Part:
 class Parser:
     def __init__(self):
         self.__function = []
-        self.__varNames = ['x']
-        self.__varValues = [3]
+        self.__varNames = []
+        self.__varValues = []
 
     def __get_value(self, p):
         assert isinstance(p, Part)
@@ -128,7 +128,8 @@ class Parser:
                         "Error while reading function:" +
                         " Expect '(', operator, function, number, constant or variable but found EOF")
 
-        print(tmp)
+        if tmp != ' ':
+            raise Exception("Error while reading")
         if bracketcounter != 0:
             raise Exception("EOF while reading function: Expect ')' but found EOF")
         return tmpfunction
@@ -213,7 +214,7 @@ class Parser:
         return True
 
     def edit_var(self, name, value):
-        index = self.__varValues.index(name)
+        index = self.__varNames.index(name)
         if index == -1:
             return False
         else:
@@ -221,14 +222,22 @@ class Parser:
             return True
 
     def get_var(self, name):
-        index = self.__varValues.index(name)
+        index = self.__varNames.index(name)
         if index == -1:
             return None
         else:
             return self.__varValues[index]
 
+    def remove_var(self, name):
+        index = self.__varNames.index(name)
+        if index == -1:
+            return False
+        else:
+            self.__varNames.pop(index)
+            return True
+
     def parse_function(self, function):
-        self.__function = self.__rec_parse_function(function)
+        self.__function = self.__rec_parse_function(function.replace(' ', ''))
 
     def improve_function(self):
         self.__function = self.__rec_improve_function(self.__function)
