@@ -60,3 +60,10 @@ for i in range(4):
     parser.edit_var('x', i)
     parser.calc_function()
 print('time with    improving: ' + str(time.time() - start))
+
+print('')
+
+# export the function as latex
+parser.parse_function('sin(x)^2')
+parser.improve_function()
+print('Latex: ' + parser.get_latex() + '=' + str(parser.calc_function()))

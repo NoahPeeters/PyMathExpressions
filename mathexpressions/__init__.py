@@ -14,6 +14,7 @@ class Kind():
     K_CONST = 2
     K_VAR = 3
     K_BRACKET = 4
+    K_LATEX = 5
 
 
 class Part:
@@ -43,20 +44,36 @@ class Part:
 class Parser:
     def __init__(self):
         self.__function = []
-        self.__varNames = []
-        self.__varValues = []
+        self.__var_names = []
+        self.__var_values = []
 
     def __get_value(self, p):
         assert isinstance(p, Part)
         if p.kind == Kind.K_CONST:
             return p.value
         elif p.kind == Kind.K_VAR:
-            return self.__varValues[self.__varNames.index(p.name)]
+            return self.__var_values[self.__var_names.index(p.name)]
         elif p.kind == Kind.K_BRACKET:
             return self.__rec_calc_function(p.parts)
         elif p.kind == Kind.K_FUNCTION:
             para = [self.__rec_calc_function(x) for x in p.parts]
             return lib.use_function(p.name, para)
+        else:
+            raise Exception("Error while calculating")
+
+    def __get_latex_string(self, p):
+        assert isinstance(p, Part)
+        if p.kind == Kind.K_CONST:
+            return lib.get_const_latex(p.name)
+        elif p.kind == Kind.K_VAR:
+            return p.name
+        elif p.kind == Kind.K_BRACKET:
+            return '(' + self.__rec_get_latex(p.parts) + ')'
+        elif p.kind == Kind.K_FUNCTION:
+            para = [self.__rec_get_latex(x) for x in p.parts]
+            return lib.get_function_latex(p.name, para)
+        elif p.kind == Kind.K_LATEX:
+            return p.name
         else:
             raise Exception("Error while calculating")
 
@@ -92,8 +109,8 @@ class Parser:
                     else:
                         bracketcounter -= 1
                         tmp += c
-                elif state == 3 and c not in lib.floatChars:
-                    tmpfunction.append(Part(Kind.K_CONST, '', float(tmp), None))
+                elif state == 3 and c not in lib.float_chars:
+                    tmpfunction.append(Part(Kind.K_CONST, functionname, float(tmp), None))
                     searchforbeginning = True
                     tmp = ''
                     state = 0
@@ -104,11 +121,11 @@ class Parser:
 
             if searchforbeginning:
                 tmp += c
-                if tmp in self.__varNames:
+                if tmp in self.__var_names:
                     tmpfunction.append(Part(Kind.K_VAR, tmp, 0, None))
                     tmp = ''
-                elif tmp in lib.constNames:
-                    tmpfunction.append(Part(Kind.K_CONST, '', lib.constValues[lib.constNames.index(tmp)], None))
+                elif tmp in lib.const_names:
+                    tmpfunction.append(Part(Kind.K_CONST, tmp, lib.const_values[lib.const_names.index(tmp)], None))
                     tmp = ''
                 elif tmp in lib.operators:
                     tmpfunction.append(Part(Kind.K_OPERATOR, tmp, 0, None))
@@ -120,7 +137,8 @@ class Parser:
                     functionname = tmp
                     state = 2
                     tmp = ''
-                elif len(tmp) == 1 and tmp in lib.floatChars:
+                elif len(tmp) == 1 and tmp in lib.float_chars:
+                    functionname = tmp
                     state = 3
                 elif tmp == ')':
                     raise Exception(
@@ -145,7 +163,8 @@ class Parser:
                     tmp_p = parts[0]
                     assert isinstance(tmp_p, Part)
                     if tmp_p.kind != Kind.K_VAR:
-                        new[count] = Part(Kind.K_CONST, '', self.__get_value(tmp_p), None)
+                        tmp = self.__get_value(tmp_p)
+                        new[count] = Part(Kind.K_CONST, str(tmp), tmp, None)
                     else:
                         new[count] = tmp_p
                 else:
@@ -158,14 +177,16 @@ class Parser:
                         tmp_p = params[count2][0]
                         assert isinstance(tmp_p, Part)
                         if tmp_p.kind != Kind.K_VAR:
-                            params[count2] = [Part(Kind.K_CONST, '', self.__get_value(tmp_p), None)]
+                            tmp = self.__get_value(tmp_p)
+                            params[count2] = [Part(Kind.K_CONST, str(tmp), tmp, None)]
                         else:
                             params[count2] = [tmp_p]
                             can_resolved = False
                     else:
                         can_resolved = False
                 if can_resolved:
-                    new[count] = Part(Kind.K_CONST, '', self.__get_value(p), None)
+                    tmp = self.__get_value(p)
+                    new[count] = Part(Kind.K_CONST, str(tmp), tmp, None)
 
         for priority in reversed(range(lib.max_priority + 1)):
             count = 0
@@ -177,8 +198,8 @@ class Parser:
                                 new[count + 1].kind == Kind.K_CONST and \
                         (count - 2 < 0 or lib.get_priority(new[count - 2]) <= priority) and \
                         (count + 2 >= len(new) or lib.get_priority(new[count + 2]) <= priority):
-                    new[count - 1] = Part(Kind.K_CONST, '',
-                                          lib.use_operator(p.name, new[count - 1].value, new[count + 1].value), None)
+                    tmp = lib.use_operator(p.name, new[count - 1].value, new[count + 1].value)
+                    new[count - 1] = Part(Kind.K_CONST, str(tmp), tmp, None)
                     new.pop(count)
                     new.pop(count)
                 else:
@@ -207,32 +228,60 @@ class Parser:
         assert isinstance(p, Part)
         return self.__get_value(p)
 
+    def __rec_get_latex(self, f):
+        new = copy.deepcopy(f)
+
+        for priority in reversed(range(lib.max_priority + 1)):
+            count = 0
+            while count < len(new):
+                p = new[count]
+                assert isinstance(p, Part)
+                if p.kind == Kind.K_OPERATOR and lib.get_priority(p) == priority:
+                    new[count - 1] = Part(Kind.K_LATEX,
+                                          lib.latex_operator(p.name, self.__get_latex_string(new[count - 1]),
+                                                             self.__get_latex_string(new[count + 1])), 0,
+                                          None)
+                    new.pop(count)
+                    new.pop(count)
+                else:
+                    count += 1
+
+        s = ''
+        for p in new:
+            assert isinstance(p, Part)
+            s += self.__get_latex_string(p)
+        return s
+
+    def __print(self):
+        for p in self.__function:
+            print(p)
+
     def add_var(self, name, value):
-        self.__varNames.append(name)
-        self.__varValues.append(value)
+        self.__var_names.append(name)
+        self.__var_values.append(value)
         return True
 
     def edit_var(self, name, value):
-        index = self.__varNames.index(name)
+        index = self.__var_names.index(name)
         if index == -1:
             return False
         else:
-            self.__varValues[index] = value
+            self.__var_values[index] = value
             return True
 
     def get_var(self, name):
-        index = self.__varNames.index(name)
+        index = self.__var_names.index(name)
         if index == -1:
             return None
         else:
-            return self.__varValues[index]
+            return self.__var_values[index]
 
     def remove_var(self, name):
-        index = self.__varNames.index(name)
+        index = self.__var_names.index(name)
         if index == -1:
             return False
         else:
-            self.__varNames.pop(index)
+            self.__var_names.pop(index)
             return True
 
     def parse_function(self, function):
@@ -243,3 +292,6 @@ class Parser:
 
     def calc_function(self):
         return self.__rec_calc_function(self.__function)
+
+    def get_latex(self):
+        return self.__rec_get_latex(self.__function)
