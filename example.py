@@ -2,11 +2,11 @@ __author__ = 'Noah Peeters'
 
 import time
 
-from mathexpressions import math
+import mathexpressions
 
 
 # first create a parser object
-parser = math.Parser()
+parser = mathexpressions.Parser()
 
 # add all variables; the value will not be used while parsing and improving
 # variable names can be as long as you want
