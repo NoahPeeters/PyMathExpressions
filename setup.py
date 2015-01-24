@@ -12,6 +12,15 @@ setup(name='mathexpressions',
       description='Python library for parsing and solving math expressions. Example Usage: ' +
                   'https://github.com/NoahPeeters/pymathexpressions/blob/master/example.py ' +
                   'Documentation is coming soon.',
+      classifiers=[
+          'Development Status :: Alpha',
+          'License :: OSI Approved :: MIT License',
+          'Programming Language :: Python :: 3 - Alpha',
+          'License :: OSI Approved :: MIT License',
+          'Programming Language :: Python',
+          'Topic :: Text Processing :: Linguistic',
+          'Topic :: Scientific/Engineering :: Mathematics'
+      ],
       url='https://github.com/NoahPeeters/pymathexpressions',
       author='Noah Peeters',
       author_email='noah.peeters@icloud.com',
