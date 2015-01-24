@@ -3,7 +3,7 @@ __author__ = 'Noah Peeters'
 from enum import Enum
 import copy
 
-import lib
+import mathexpressions.lib as lib
 
 
 print_indent = 0
@@ -61,7 +61,7 @@ class Parser:
         else:
             raise Exception("Error while calculating")
 
-    def __rec_load_function(self, f):
+    def __rec_parse_function(self, f):
         f += ' '
 
         tmpfunction = []
@@ -83,11 +83,11 @@ class Parser:
                 elif c == ')':
                     if bracketcounter == 0:
                         if state == 1:
-                            tmpfunction.append(Part(Kind.K_BRACKET, '', 0, self.__rec_load_function(tmp)))
+                            tmpfunction.append(Part(Kind.K_BRACKET, '', 0, self.__rec_parse_function(tmp)))
                         elif state == 4:
                             tmpfunction.append(
                                 Part(Kind.K_FUNCTION, functionname, 0,
-                                     [self.__rec_load_function(x) for x in tmp.split(',')]))
+                                     [self.__rec_parse_function(x) for x in tmp.split(',')]))
                         state = 0
                         tmp = ''
                     else:
@@ -166,16 +166,14 @@ class Parser:
                         can_resolved = False
                 if can_resolved:
                     new[count] = Part(Kind.K_CONST, '', self.__get_value(p), None)
-                    # else:
-                    # new[count].parts = params
 
         for priority in reversed(range(lib.max_priority + 1)):
             count = 0
             while count < len(new):
                 p = new[count]
                 assert isinstance(p, Part)
-                if p.kind == Kind.K_OPERATOR and lib.get_priority(p) == priority and new[
-                            count - 1].kind == Kind.K_CONST and \
+                if p.kind == Kind.K_OPERATOR and lib.get_priority(p) == priority and \
+                                new[count - 1].kind == Kind.K_CONST and \
                                 new[count + 1].kind == Kind.K_CONST and \
                         (count - 2 < 0 or lib.get_priority(new[count - 2]) <= priority) and \
                         (count + 2 >= len(new) or lib.get_priority(new[count + 2]) <= priority):
@@ -229,8 +227,8 @@ class Parser:
         else:
             return self.__varValues[index]
 
-    def load_function(self, function):
-        self.__function = self.__rec_load_function(function)
+    def parse_function(self, function):
+        self.__function = self.__rec_parse_function(function)
 
     def improve_function(self):
         self.__function = self.__rec_improve_function(self.__function)
