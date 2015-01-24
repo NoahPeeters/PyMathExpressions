@@ -1,6 +1,5 @@
 __author__ = 'Noah Peeters'
 
-from enum import Enum
 import copy
 
 import mathexpressions.lib as lib
@@ -9,7 +8,7 @@ import mathexpressions.lib as lib
 print_indent = 0
 
 
-class Kind(Enum):
+class Kind():
     K_OPERATOR = 0
     K_FUNCTION = 1
     K_CONST = 2

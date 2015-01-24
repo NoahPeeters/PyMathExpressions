@@ -3,7 +3,7 @@ __author__ = 'Noah Peeters'
 from setuptools import setup
 
 setup(name='mathexpressions',
-      version='0.1',
+      version='0.2',
       description='Python library for parsing and solving math expressions.',
       url='https://github.com/NoahPeeters/pymathexpressions',
       author='Noah Peeters',
