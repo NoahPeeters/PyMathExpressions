@@ -9,9 +9,7 @@ def readme():
 
 setup(name='mathexpressions',
       version='1.0.0',
-      description='Python library for parsing and solving math expressions. Example Usage: ' +
-                  'https://github.com/NoahPeeters/pymathexpressions/blob/master/example.py ' +
-                  'Documentation is coming soon.',
+      description='Python library for parsing and solving math expressions.',
       classifiers=[
           'Development Status :: 4 - Beta',
           'License :: OSI Approved :: MIT License',
