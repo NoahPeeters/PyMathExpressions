@@ -44,15 +44,15 @@ class Part:
 class Parser:
     def __init__(self):
         self.__function = []
-        self.__var_names = []
-        self.__var_values = []
+        self.__var = {}
+        self.__const = {}
 
     def __get_value(self, p):
         assert isinstance(p, Part)
         if p.kind == Kind.K_CONST:
             return p.value
         elif p.kind == Kind.K_VAR:
-            return self.__var_values[self.__var_names.index(p.name)]
+            return self.__var[p.name][0]
         elif p.kind == Kind.K_BRACKET:
             return self.__rec_calc_function(p.parts)
         elif p.kind == Kind.K_FUNCTION:
@@ -64,9 +64,14 @@ class Parser:
     def __get_latex_string(self, p):
         assert isinstance(p, Part)
         if p.kind == Kind.K_CONST:
-            return lib.get_const_latex(p.name)
+            if p.name in self.__const:
+                return self.__const[p.name][1]
+            elif p.name in lib.const:
+                return lib.const[p.name][1]
+            else:
+                return p.name
         elif p.kind == Kind.K_VAR:
-            return p.name
+            return self.__var[p.name][1]
         elif p.kind == Kind.K_BRACKET:
             return '(' + self.__rec_get_latex(p.parts) + ')'
         elif p.kind == Kind.K_FUNCTION:
@@ -77,6 +82,9 @@ class Parser:
         else:
             raise Exception("Error while calculating")
 
+    def is_const(self, name):
+        return name in self.__const or name in lib.const
+
     def __rec_parse_function(self, f):
         f += ' '
 
@@ -86,13 +94,8 @@ class Parser:
         functionname = ''
         bracketcounter = 0
 
-        for cc in f:
-            c = cc[0]
+        for c in f:
             if state != 0:
-                if state == 2:
-                    c = ''
-                    state = 4
-                searchforbeginning = False
                 if c == '(':
                     bracketcounter += 1
                     tmp += c
@@ -100,7 +103,7 @@ class Parser:
                     if bracketcounter == 0:
                         if state == 1:
                             tmpfunction.append(Part(Kind.K_BRACKET, '', 0, self.__rec_parse_function(tmp)))
-                        elif state == 4:
+                        elif state == 2:
                             tmpfunction.append(
                                 Part(Kind.K_FUNCTION, functionname, 0,
                                      [self.__rec_parse_function(x) for x in tmp.split(',')]))
@@ -109,43 +112,31 @@ class Parser:
                     else:
                         bracketcounter -= 1
                         tmp += c
-                elif state == 3 and c not in lib.float_chars:
-                    tmpfunction.append(Part(Kind.K_CONST, functionname, float(tmp), None))
-                    searchforbeginning = True
-                    tmp = ''
-                    state = 0
                 else:
                     tmp += c
             else:
-                searchforbeginning = True
+                if c in lib.operators or c in ['(', ' ']:
+                    if tmp in lib.functions:
+                        functionname = tmp
+                        state = 2
+                    elif c == '(':
+                        state = 1
+                    elif tmp in self.__const:
+                        tmpfunction.append(Part(Kind.K_CONST, tmp, self.__const[tmp][0], None))
+                    elif tmp in lib.const:
+                        tmpfunction.append(Part(Kind.K_CONST, tmp, lib.const[tmp][0], None))
+                    elif lib.is_number(tmp):
+                        tmpfunction.append(Part(Kind.K_CONST, tmp, float(tmp), None))
+                    elif tmp.strip() != '':
+                        tmpfunction.append(Part(Kind.K_VAR, tmp, 0, None))
 
-            if searchforbeginning:
-                tmp += c
-                if tmp in self.__var_names:
-                    tmpfunction.append(Part(Kind.K_VAR, tmp, 0, None))
                     tmp = ''
-                elif tmp in lib.const_names:
-                    tmpfunction.append(Part(Kind.K_CONST, tmp, lib.const_values[lib.const_names.index(tmp)], None))
-                    tmp = ''
-                elif tmp in lib.operators:
-                    tmpfunction.append(Part(Kind.K_OPERATOR, tmp, 0, None))
-                    tmp = ''
-                elif tmp == '(':
-                    state = 1
-                    tmp = ''
-                elif tmp in lib.functions:
-                    functionname = tmp
-                    state = 2
-                    tmp = ''
-                elif len(tmp) == 1 and tmp in lib.float_chars:
-                    functionname = tmp
-                    state = 3
-                elif tmp == ')':
-                    raise Exception(
-                        "Error while reading function:" +
-                        " Expect '(', operator, function, number, constant or variable but found EOF")
+                    if c not in ['(', ' ']:
+                        tmpfunction.append(Part(Kind.K_OPERATOR, c, 0, None))
+                else:
+                    tmp += c
 
-        if tmp != ' ':
+        if tmp != '':
             raise Exception("Error while reading")
         if bracketcounter != 0:
             raise Exception("EOF while reading function: Expect ')' but found EOF")
@@ -256,32 +247,23 @@ class Parser:
         for p in self.__function:
             print(p)
 
-    def add_var(self, name, value):
-        self.__var_names.append(name)
-        self.__var_values.append(value)
+    def set_const(self, lst):
+        self.__const = lst
 
-    def edit_var(self, name, value):
-        index = self.__var_names.index(name)
-        if index == -1:
-            return False
-        else:
-            self.__var_values[index] = value
-            return True
+    def edit_const(self, lst):
+        self.__const.update(lst)
 
-    def get_var(self, name):
-        index = self.__var_names.index(name)
-        if index == -1:
-            return None
-        else:
-            return self.__var_values[index]
+    def remove_const(self, name):
+        self.__const.pop(name, None)
+
+    def set_var(self, lst):
+        self.__var = lst
+
+    def edit_var(self, lst):
+        self.__var.update(lst)
 
     def remove_var(self, name):
-        index = self.__var_names.index(name)
-        if index == -1:
-            return False
-        else:
-            self.__var_names.pop(index)
-            return True
+        self.__var.pop(name, None)
 
     def parse_function(self, function):
         self.__function = self.__rec_parse_function(function.replace(' ', ''))
@@ -291,6 +273,21 @@ class Parser:
 
     def calc_function(self):
         return self.__rec_calc_function(self.__function)
+
+    def compare_function(self):
+        functions = [[], []]
+        c = 0
+        for p in self.__function:
+            assert isinstance(p, Part)
+            if p.kind == Kind.K_OPERATOR and p.name == '=':
+                c += 1
+            else:
+                functions[c].append(p)
+
+        if c != 1:
+            raise Exception("False number of '='")
+
+        return self.__rec_calc_function(functions[0]) - self.__rec_calc_function(functions[1])
 
     def get_latex(self):
         return self.__rec_get_latex(self.__function)

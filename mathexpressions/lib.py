@@ -1,18 +1,18 @@
 __author__ = 'Noah Peeters'
 
 import math
-import random
 
-const_names = ['pi', 'e']
-const_values = [math.pi, math.e]
-const_latex = ['\pi', 'e']
+const = {
+    'pi': [math.pi, '\pi'],
+    'e': [math.e, 'e']
+}
 
 float_chars = [str(x) for x in range(10)]
 float_chars.append('.')
 
-operators = ['+', '-', '*', '/', '^', '%']
-operators_priorities = [0, 0, 1, 1, 2, 1]
-operators_latex = ['%s+%s', '%s-%s', '%s*%s', '\\frac{%s}{%s}', '%s^{%s}', '%s\\mod%s']
+operators = ['+', '-', '*', '/', '^', '%', '=']
+operators_priorities = [0, 0, 1, 1, 2, 1, 0]
+operators_latex = ['%s+%s', '%s-%s', '%s*%s', '\\frac{%s}{%s}', '%s^{%s}', '%s\\mod%s', '%s=%s']
 
 max_priority = 2
 
@@ -30,6 +30,8 @@ def use_operator(o, para1, para2):
         return math.pow(para1, para2)
     elif o == '%':
         return math.pow(para1, para2)
+    elif o == '=':
+        return None
 
 
 def latex_operator(o, para1, para2):
@@ -37,15 +39,17 @@ def latex_operator(o, para1, para2):
     return operators_latex[index] % (para1, para2)
 
 
-def get_const_latex(name):
-    if name in const_names:
-        return const_latex[const_names.index(name)]
-    else:
-        return name
-
-
 def get_priority(p):
     return operators_priorities[operators.index(p.name)]
+
+
+def is_number(name):
+    if len(name) == 0:
+        return False
+    for i in name:
+        if i not in float_chars:
+            return False
+    return True
 
 
 functions = {
@@ -78,7 +82,6 @@ functions = {
     'logn': None,  # latex support
     'pow': '%s^{%s}',
     'radians': None,
-    'random': None,
     'round': None,
     'roundn': None,
     'sin': '\\sin(%s)',
@@ -90,9 +93,7 @@ functions = {
 
 
 def use_function(name, para):
-    if name == 'random':
-        return random.random() * para[0]
-    elif name == 'logn':
+    if name == 'logn':
         return math.log(para[0], para[1])
     elif name == 'round':
         return round(para[0])
