@@ -15,7 +15,7 @@ setup(name='mathexpressions',
       classifiers=[
           'Development Status :: 4 - Beta',
           'License :: OSI Approved :: MIT License',
-          'Programming Language :: Python :: 3 - Alpha',
+          'Programming Language :: Python :: 3',
           'License :: OSI Approved :: MIT License',
           'Programming Language :: Python',
           'Topic :: Text Processing :: Linguistic',
