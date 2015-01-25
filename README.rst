@@ -15,5 +15,4 @@ Simple example:
     >>> parser.parse_function('x^2')
     16
     
-For advanced usage check the example.py (https://github.com/NoahPeeters/pymathexpressions/blob/master/example.py) out.
-A documentation is comming soon.
+For advanced usage check out the documentation (http://pythonhosted.org//mathexpressions/).
