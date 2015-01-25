@@ -8,7 +8,7 @@ def readme():
         return f.read()
 
 setup(name='mathexpressions',
-      version='1.0.0',
+      version='1.1.0',
       description='Python library for parsing and solving math expressions.',
       classifiers=[
           'Development Status :: 4 - Beta',
