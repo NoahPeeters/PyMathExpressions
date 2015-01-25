@@ -48,7 +48,7 @@ print('')
 # if you want to calculate the same function multiple times, it makes sense to improve it
 parser.parse_function('1+2*(x)^(2+pi)')
 start = time.time()
-for i in range(4):
+for i in range(10):
     parser.edit_var('x', i)
     parser.calc_function()
 print('time without improving: ' + str(time.time() - start))
@@ -56,7 +56,7 @@ print('time without improving: ' + str(time.time() - start))
 parser.parse_function('1+2*(x)^(2+pi)')
 parser.improve_function()  # function = '1+2*x^5.141592653589793'
 start = time.time()
-for i in range(4):
+for i in range(10):
     parser.edit_var('x', i)
     parser.calc_function()
 print('time with    improving: ' + str(time.time() - start))

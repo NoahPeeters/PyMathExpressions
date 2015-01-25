@@ -8,12 +8,12 @@ def readme():
         return f.read()
 
 setup(name='mathexpressions',
-      version='0.3',
+      version='1.0.0',
       description='Python library for parsing and solving math expressions. Example Usage: ' +
                   'https://github.com/NoahPeeters/pymathexpressions/blob/master/example.py ' +
                   'Documentation is coming soon.',
       classifiers=[
-          'Development Status :: Alpha',
+          'Development Status :: 4 - Beta',
           'License :: OSI Approved :: MIT License',
           'Programming Language :: Python :: 3 - Alpha',
           'License :: OSI Approved :: MIT License',

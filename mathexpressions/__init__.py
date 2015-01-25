@@ -259,7 +259,6 @@ class Parser:
     def add_var(self, name, value):
         self.__var_names.append(name)
         self.__var_values.append(value)
-        return True
 
     def edit_var(self, name, value):
         index = self.__var_names.index(name)
