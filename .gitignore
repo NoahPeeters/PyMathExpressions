@@ -10,3 +10,6 @@ atlassian-ide-plugin.xml
 /dist/
 /*.egg-info
 *.pyc
+
+#mac
+.DS_Store
