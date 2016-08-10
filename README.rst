@@ -17,4 +17,4 @@ Simple example:
     
 For advanced usage check out the documentation (http://pythonhosted.org/mathexpressions/).
 
-Install the library with `pip install mathexpressions`.
+Install the library with ``pip install mathexpressions``.
